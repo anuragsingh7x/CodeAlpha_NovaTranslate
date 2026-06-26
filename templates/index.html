@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaTranslate</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Our stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+
+  <!-- ── Top Navigation Bar ── -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo"><i class="fa-solid fa-language"></i></span>
+      <span class="nav-title">NovaTranslate</span>
+    </div>
+    <div class="nav-actions">
+      <button id="themeToggle" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <i class="fa-solid fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Hero Section ── -->
+  <header class="hero">
+    <p class="hero-eyebrow">AI Powered Language Translation</p>
+    <h1 class="hero-heading">Translate anything,<br><span class="accent">instantly.</span></h1>
+    <p class="hero-sub">Powered by Google Translate · 19 languages · Works on any device</p>
+  </header>
+
+  <!-- ── Main Card ── -->
+  <main class="container">
+    <div class="card">
+
+      <!-- ── Language Selector Row ── -->
+      <div class="lang-row">
+
+        <!-- Source language -->
+        <div class="lang-group">
+          <label for="sourceLang" class="lang-label">
+            <i class="fa-solid fa-earth-americas"></i> From
+          </label>
+          <div class="select-wrap">
+            <select id="sourceLang" name="source_lang">
+              {% for name, code in languages.items() %}
+              <option value="{{ code }}" {% if code == 'auto' %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+            <i class="fa-solid fa-chevron-down select-arrow"></i>
+          </div>
+        </div>
+
+        <!-- Swap button -->
+        <button id="swapBtn" class="swap-btn" title="Swap languages" aria-label="Swap source and target languages">
+          <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        </button>
+
+        <!-- Target language -->
+        <div class="lang-group">
+          <label for="targetLang" class="lang-label">
+            <i class="fa-solid fa-earth-asia"></i> To
+          </label>
+          <div class="select-wrap">
+            <select id="targetLang" name="target_lang">
+              {% for name, code in target_languages.items() %}
+              <option value="{{ code }}" {% if code == 'hi' %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+            <i class="fa-solid fa-chevron-down select-arrow"></i>
+          </div>
+        </div>
+
+      </div><!-- /lang-row -->
+
+      <!-- ── Text Areas ── -->
+      <div class="panels">
+
+        <!-- Input Panel -->
+        <div class="panel panel-input">
+          <div class="panel-header">
+            <span class="panel-label">Source Text</span>
+            <button id="clearBtn" class="text-btn" title="Clear input">
+              <i class="fa-solid fa-xmark"></i> Clear
+            </button>
+          </div>
+          <textarea
+            id="inputText"
+            placeholder="Type or paste your text here… (max 5000 characters)"
+            maxlength="5000"
+            aria-label="Text to translate"
+            spellcheck="true"
+          ></textarea>
+          <div class="panel-footer">
+            <span id="charCount" class="counter">0 / 5000 chars</span>
+            <span id="wordCount" class="counter">0 words</span>
+          </div>
+        </div>
+
+        <!-- Divider (hidden on mobile, shown as arrow on desktop) -->
+        <div class="panel-divider" aria-hidden="true">
+          <i class="fa-solid fa-arrow-right divider-icon"></i>
+        </div>
+
+        <!-- Output Panel -->
+        <div class="panel panel-output">
+          <div class="panel-header">
+            <span class="panel-label">Translation</span>
+            <div class="output-actions">
+              <button id="copyBtn" class="text-btn" title="Copy translation" disabled>
+                <i class="fa-regular fa-copy"></i> Copy
+              </button>
+              <button id="ttsBtn" class="text-btn" title="Listen to translation" disabled>
+                <i class="fa-solid fa-volume-high"></i> Listen
+              </button>
+            </div>
+          </div>
+          <div class="output-wrap">
+            <textarea
+              id="outputText"
+              placeholder="Translation will appear here…"
+              readonly
+              aria-label="Translated text"
+            ></textarea>
+            <!-- Loading spinner overlay -->
+            <div id="loadingOverlay" class="loading-overlay hidden" aria-live="polite">
+              <span class="spinner" aria-label="Translating…"></span>
+              <span class="loading-label">Translating…</span>
+            </div>
+          </div>
+          <div class="panel-footer">
+            <span id="outCharCount" class="counter"></span>
+          </div>
+        </div>
+
+      </div><!-- /panels -->
+
+      <!-- ── Error / Flash Message ── -->
+      <div id="errorBox" class="error-box hidden" role="alert" aria-live="assertive">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="errorMsg"></span>
+      </div>
+
+      <!-- ── Action Buttons ── -->
+      <div class="actions">
+        <button id="translateBtn" class="btn btn-primary">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          Translate
+        </button>
+      </div>
+
+      <p class="hint">Tip: Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to translate quickly.</p>
+
+    </div><!-- /card -->
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <p>Built with <i class="fa-solid fa-heart accent"></i> for <strong>CodeAlpha AI Internship</strong> &nbsp;·&nbsp; Powered by <strong>Flask</strong> &amp; <strong>deep-translator</strong></p>
+  </footer>
+
+  <!-- Our JavaScript -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

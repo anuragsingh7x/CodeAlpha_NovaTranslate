@@ -26,3 +26,7 @@ An AI-powered multilingual language translation web application built using Pyth
 ```bash
 pip install -r requirements.txt
 python app.py
+
+## 🌐 Live Demo
+
+https://codealpha-novatranslate-1.onrender.com
